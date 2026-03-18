@@ -7,7 +7,7 @@ export interface DocumentItem {
 }
 
 interface Props {
-  applicantId: number;
+  applicantId: string;
   documents: DocumentItem[];
 }
 

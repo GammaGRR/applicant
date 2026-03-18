@@ -1,4 +1,4 @@
-import { LogOut, Users, ChartColumn, X } from 'lucide-react';
+import { LogOut, Users, ChartColumn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { ApplicantDocuments } from '../components/ApplicantDocument';
@@ -9,7 +9,7 @@ import { ApplicantForm } from '../components/ApplicantFormModal';
 import { FilterDropdown } from '../components/FilterDropDown';
 
 interface Applicant {
-  id: number;
+  case: string;
   documents: DocumentItem[];
   fullName: string;
   classes: string;
@@ -39,7 +39,7 @@ const statisticsConfig = [
     lable: '9 класс на коммерцию',
     count: 1,
   },
-    {
+  {
     colorBlock: 'bg-blue-500/10',
     colorText: 'text-blue-600',
     lable: 'Подано всего 11 класс на бюджет',
@@ -74,7 +74,7 @@ export const DashboardPage = () => {
 
   const applicants: Applicant[] = [
     {
-      id: 1,
+      case: '1/9 ИС',
       documents: [
         { name: 'Заявление абитуриента', status: 'done' },
         { name: 'Согласие (абитуриент)', status: 'done' },
@@ -98,7 +98,55 @@ export const DashboardPage = () => {
       note: 'Закончил Рязанский колледж электроники с отличием',
     },
     {
-      id: 2,
+      case: '2/9 ИС',
+      documents: [
+        { name: 'Заявление абитуриента', status: 'done' },
+        { name: 'Согласие (абитуриент)', status: 'done' },
+        { name: 'Согласие (родитель)', status: 'missing' },
+        { name: 'Аттестат (оригинал)', status: 'missing' },
+        { name: 'Копия аттестата', status: 'done' },
+        { name: 'Копия паспорта', status: 'done' },
+        { name: 'Фото', status: 'done' },
+        { name: 'Мед. справка', status: 'done' },
+        { name: 'ФЛГ', status: 'done' },
+        { name: 'Копия карты прививок', status: 'done' },
+        { name: 'Копия СНИЛС', status: 'done' },
+        { name: 'ИНН', status: 'done' },
+      ],
+      fullName: 'Клевцов Павел Константинович',
+      classes: '9',
+      profession: '09.02.11 Информационные системы и программирование',
+      finance: 'К',
+      point: 4.4,
+      benefit: '-',
+      note: 'Закончил Рязанский колледж электроники с отличием',
+    },
+    {
+      case: '3/9 ИС',
+      documents: [
+        { name: 'Заявление абитуриента', status: 'done' },
+        { name: 'Согласие (абитуриент)', status: 'done' },
+        { name: 'Согласие (родитель)', status: 'missing' },
+        { name: 'Аттестат (оригинал)', status: 'missing' },
+        { name: 'Копия аттестата', status: 'done' },
+        { name: 'Копия паспорта', status: 'done' },
+        { name: 'Фото', status: 'done' },
+        { name: 'Мед. справка', status: 'missing' },
+        { name: 'ФЛГ', status: 'done' },
+        { name: 'Копия карты прививок', status: 'done' },
+        { name: 'Копия СНИЛС', status: 'done' },
+        { name: 'ИНН', status: 'done' },
+      ],
+      fullName: 'Папичевский Василий Валерьевич',
+      classes: '9',
+      profession: '09.02.11 Информационные системы и программирование',
+      finance: 'Б',
+      point: 4.5,
+      benefit: '-',
+      note: 'Закончил Рязанский колледж электроники без отличием',
+    },
+    {
+      case: '4/11 ИС',
       documents: [
         { name: 'Заявление абитуриента', status: 'done' },
         { name: 'Согласие (абитуриент)', status: 'done' },
@@ -121,10 +169,34 @@ export const DashboardPage = () => {
       benefit: 'Слишком крут для этого',
       note: 'Закончил Рязанский колледж электроники с отличием',
     },
+    {
+      case: '1/9 ССА',
+      documents: [
+        { name: 'Заявление абитуриента', status: 'done' },
+        { name: 'Согласие (абитуриент)', status: 'done' },
+        { name: 'Согласие (родитель)', status: 'missing' },
+        { name: 'Аттестат (оригинал)', status: 'missing' },
+        { name: 'Копия аттестата', status: 'done' },
+        { name: 'Копия паспорта', status: 'done' },
+        { name: 'Фото', status: 'done' },
+        { name: 'Мед. справка', status: 'missing' },
+        { name: 'ФЛГ', status: 'done' },
+        { name: 'Копия карты прививок', status: 'done' },
+        { name: 'Копия СНИЛС', status: 'done' },
+        { name: 'ИНН', status: 'done' },
+      ],
+      fullName: 'Тестовые данные',
+      classes: '9',
+      profession: '09.02.06 Сетевое и ситемное администрирование',
+      finance: 'Б',
+      point: 3,
+      benefit: '-',
+      note: 'Закончил Рязанский колледж электроники без отличием',
+    },
   ];
 
   const uniqueValues = {
-    id: [...new Set(applicants.map((a) => String(a.id)))],
+    id: [...new Set(applicants.map((a) => String(a.case)))],
     docStatus: ['Оригинал', 'Копия'],
     fullName: [...new Set(applicants.map((a) => a.fullName))],
     classes: [...new Set(applicants.map((a) => a.classes))],
@@ -149,10 +221,11 @@ export const DashboardPage = () => {
   const filteredApplicants = applicants.filter((a) => {
     const term = searchTerm.toLowerCase();
     const matchesSearch =
-      a.fullName.toLowerCase().includes(term) || a.id.toString().includes(term);
+      a.fullName.toLowerCase().includes(term) ||
+      a.case.toLowerCase().includes(term);
 
     const matchesFilters = [
-      filters.id.length === 0 || filters.id.includes(String(a.id)),
+      filters.id.length === 0 || filters.id.includes(String(a.case)),
       filters.docStatus.length === 0 ||
         filters.docStatus.includes(getCertificateStatus(a.documents)),
       filters.fullName.length === 0 || filters.fullName.includes(a.fullName),
@@ -239,10 +312,10 @@ export const DashboardPage = () => {
               </div>
             </div>
           </div>
-          <div className='p-4 bg-white rounded-xl border border-gray-300 shadow'>
+          <div className="p-4 bg-white rounded-xl border border-gray-300 shadow">
             <input
               type="text"
-              placeholder="Поиск по имени или ID"
+              placeholder="Поиск по имени или № дела"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="border border-gray-300 shadow focus:outline-none rounded-xl p-2 w-full"
@@ -272,9 +345,7 @@ export const DashboardPage = () => {
                 {hasActiveFilters && (
                   <button
                     onClick={resetAllFilters}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 border border-red-200 rounded-lg transition-colors"
-                  >
-                    <X size={12} className='p-1 bg-gray-100'/>
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 border border-red-200 rounded-lg transition-colors">
                     Сбросить фильтры
                   </button>
                 )}
@@ -376,15 +447,15 @@ export const DashboardPage = () => {
                 )}
                 {filteredApplicants.map((applicant) => (
                   <tr
-                    key={applicant.id}
+                    key={applicant.case}
                     className="hover:bg-gray-100 text-center"
                   >
                     <td className="px-2 sm:px-6 py-2 text-center">
-                      {applicant.id}
+                      {applicant.case}
                     </td>
                     <td className="px-2 sm:px-6 py-2 max-w-[150px] sm:max-w-[250px]">
                       <ApplicantDocuments
-                        applicantId={applicant.id}
+                        applicantId={applicant.case}
                         documents={applicant.documents}
                       />
                     </td>

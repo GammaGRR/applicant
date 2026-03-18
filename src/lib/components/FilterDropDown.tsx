@@ -89,7 +89,7 @@ export const FilterDropdown = ({ options, selected, onChange, label }: FilterDro
           <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100 bg-gray-50">
             <span className="text-xs font-medium text-gray-600 truncate max-w-[100px]">{label}</span>
             <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600">
-              <X size={12} />
+              <X size={13} />
             </button>
           </div>
 
