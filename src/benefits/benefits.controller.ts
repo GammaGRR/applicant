@@ -5,10 +5,8 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/guards/roles.decorator';
 
 @Controller('benefits')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
-@Roles('dev', 'admin')
 export class BenefitsController {
-  constructor(private readonly benefitsService: BenefitsService) {}
+  constructor(private readonly benefitsService: BenefitsService) { }
 
   @Get()
   findAll() {
@@ -16,11 +14,15 @@ export class BenefitsController {
   }
 
   @Post()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('dev', 'admin')
   create(@Body() body: Partial<any>) {
     return this.benefitsService.create(body);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('dev', 'admin')
   remove(@Param('id') id: number) {
     return this.benefitsService.remove(id);
   }

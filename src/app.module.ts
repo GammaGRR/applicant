@@ -7,6 +7,8 @@ import { AdminModule } from './admin/admin.module';
 import { SpecialitiesModule } from './specialties/specialty.module';
 import { BenefitsModule } from './benefits/benefit.module';
 import { DocumentsModule } from './documents/documents.module';
+import { FormsModule } from './forms/forms.module';
+import { ApplicantsModule } from './applicant/applicant.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { DocumentsModule } from './documents/documents.module';
     SpecialitiesModule,
     BenefitsModule,
     DocumentsModule,
+    FormsModule,
+    ApplicantsModule,
 
     // Подключение к PostgreSQL
     TypeOrmModule.forRootAsync({

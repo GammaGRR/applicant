@@ -5,10 +5,8 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/guards/roles.decorator';
 
 @Controller('specialities')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
-@Roles('dev', 'admin')
 export class SpecialitiesController {
-  constructor(private readonly specialitiesService: SpecialitiesService) {}
+  constructor(private readonly specialitiesService: SpecialitiesService) { }
 
   @Get()
   findAll() {
@@ -16,11 +14,15 @@ export class SpecialitiesController {
   }
 
   @Post()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('dev', 'admin')
   create(@Body() body: Partial<any>) {
     return this.specialitiesService.create(body);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('dev', 'admin')
   remove(@Param('id') id: number) {
     return this.specialitiesService.remove(id);
   }
