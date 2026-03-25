@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request, ForbiddenException, Query } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { ApplicantsService } from './applicant.service';
 import { UsersService } from '../users/users.service';
@@ -13,11 +13,25 @@ export class ApplicantsController {
     private readonly usersService: UsersService,
   ) {}
 
+  @Get('filter-options')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('dev', 'admin', 'user')
+  getFilterOptions() {
+    return this.applicantsService.getFilterOptions();
+  }
+
+  @Get('stats')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('dev', 'admin', 'user')
+  getStats() {
+    return this.applicantsService.getStats();
+  }
+
   @Get()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('dev', 'admin', 'user')
-  findAll() {
-    return this.applicantsService.findAll();
+  findAll(@Query() query: Record<string, any>) {
+    return this.applicantsService.findAll(query);
   }
 
   @Get(':id')

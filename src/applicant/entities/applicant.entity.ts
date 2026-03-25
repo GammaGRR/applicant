@@ -33,7 +33,7 @@ export class Applicant {
   note: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  documents: { name: string; status: 'done' | 'missing' }[];
+  documents: { name: string; status: 'done' | 'missing'; count?: number }[];
 
   @Column({ nullable: true })
   formId: number;
