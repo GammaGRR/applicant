@@ -37,62 +37,66 @@ export const AdminPage = () => {
     setIsMobileOpen(false);
   };
 
+  const labelMotion = (expanded: boolean) =>
+    `min-w-0 truncate whitespace-nowrap transition-[max-width,opacity,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+      expanded ? 'max-w-[14rem] opacity-100 translate-x-0' : 'max-w-0 opacity-0 -translate-x-1 pointer-events-none'
+    }`;
+
   return (
     <div className="flex h-screen bg-gray-100">
-      {isMobileOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 bg-opacity-40 z-20 md:hidden"
-          onClick={() => setIsMobileOpen(false)}
-        />
-      )}
+      <div
+        role="presentation"
+        className={`fixed inset-0 z-20 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:hidden ${
+          isMobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setIsMobileOpen(false)}
+      />
       <aside
         onMouseEnter={() => setIsExpanded(true)}
         onMouseLeave={() => setIsExpanded(false)}
-        className={`hidden md:flex flex-col bg-white shadow-md transition-all duration-300 ease-in-out
-          ${isExpanded ? 'w-64' : 'w-16'}
-        `}
+        className={`hidden md:flex flex-col shrink-0 bg-white shadow-md overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[width] ${
+          isExpanded ? 'w-64' : 'w-16'
+        }`}
       >
-        <div className="flex items-center gap-2 px-4 py-5 border-b border-gray-300 overflow-hidden">
-          <Shield className="text-blue-600 shrink-0" size={24} />
-          {isExpanded && (
-            <span className="font-semibold text-lg whitespace-nowrap">
-              Админ панель
-            </span>
-          )}
+        <div className="flex items-center gap-2 px-3 py-5 border-b border-gray-300 min-h-[4.5rem]">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center">
+            <Shield className="text-blue-600" size={24} />
+          </span>
+          <span className={`font-semibold text-lg ${labelMotion(isExpanded)}`}>Админ панель</span>
         </div>
-        <nav className="flex-1 px-2 py-4 space-y-1">
+        <nav className="flex-1 px-2 py-4 space-y-1 overflow-x-hidden">
           {menuItems.map((item) => (
             <button
               key={item.id}
+              type="button"
               onClick={() => setActiveSection(item.id as Section)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition
+              className={`w-full flex items-center gap-0 rounded-lg text-sm transition-colors duration-200
                 ${activeSection === item.id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-100'}
-                ${!isExpanded ? 'justify-center' : ''}
               `}
             >
-              <item.icon size={18} className="shrink-0" />
-              {isExpanded && (
-                <span className="whitespace-nowrap">{item.label}</span>
-              )}
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                <item.icon size={18} className="shrink-0" />
+              </span>
+              <span className={`flex-1 text-left pr-2 ${labelMotion(isExpanded)}`}>{item.label}</span>
             </button>
           ))}
         </nav>
-        <div className="px-2 py-4 border-t border-gray-300">
+        <div className="px-2 py-4 border-t border-gray-300 overflow-x-hidden">
           <Link
             to="/Dashboard"
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition
-              ${!isExpanded ? 'justify-center' : ''}
-            `}
+            className="flex w-full items-center gap-0 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors duration-200"
           >
-            <LogOut size={18} className="shrink-0" />
-            {isExpanded && <span className="whitespace-nowrap">Выйти</span>}
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+              <LogOut size={18} className="shrink-0" />
+            </span>
+            <span className={`flex-1 text-left pr-2 ${labelMotion(isExpanded)}`}>Выйти</span>
           </Link>
         </div>
       </aside>
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-md flex flex-col z-30 transition-transform duration-300 ease-in-out md:hidden
-          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
+        className={`fixed top-0 left-0 z-30 flex h-full w-64 flex-col bg-white shadow-xl transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform md:hidden ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-300">
           <div className="flex items-center gap-2">

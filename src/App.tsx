@@ -5,6 +5,7 @@ import { PublicRoute } from './lib/components/PublicRoute';
 import { PrivateRoute } from './lib/components/PrivateRoute';
 import { AdminPage } from './lib/pages/AdminPage';
 import { AdminRoute } from './lib/components/AdminRoute';
+import { SpecialtiesStats } from './lib/pages/Statistic';
 import './index.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -14,7 +15,7 @@ export const App = () => {
       <BrowserRouter>
         <Routes>
           <Route>
-            <Route path="/" element={
+            <Route path="/login/auth" element={
               <PublicRoute>
                 <Login />
               </PublicRoute>
@@ -22,6 +23,7 @@ export const App = () => {
             <Route path="/Dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
             <Route path="/ApplicantForm" element={<PrivateRoute><ApplicantForm /></PrivateRoute>} />
             <Route path="/Admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
+            <Route path="/" element={<SpecialtiesStats />} />
           </Route>
         </Routes>
       </BrowserRouter>

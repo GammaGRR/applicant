@@ -1,9 +1,8 @@
 import { Navigate } from 'react-router-dom';
+import { hasValidSession } from '../utils/token';
 
 export const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const token = localStorage.getItem('access_token');
-
-  if (!token) {
+  if (!hasValidSession()) {
     return <Navigate to="/" replace />;
   }
 

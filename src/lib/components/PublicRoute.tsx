@@ -1,9 +1,9 @@
 import { Navigate } from 'react-router-dom';
+import { hasValidSession, normalizePublicEntry } from '../utils/token';
 
 export const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const token = localStorage.getItem('access_token');
-
-  if (token) {
+  normalizePublicEntry();
+  if (hasValidSession()) {
     return <Navigate to="/Dashboard" replace />;
   }
 
