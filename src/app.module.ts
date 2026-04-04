@@ -12,11 +12,12 @@ import { ApplicantsModule } from './applicant/applicant.module';
 
 @Module({
   imports: [
-    // Загружаем .env глобально
+    // Глобальная конфигурация
     ConfigModule.forRoot({
       isGlobal: true,
     }),
 
+    // Регистрация модулей
     UsersModule,
     AuthModule,
     AdminModule,
@@ -26,7 +27,7 @@ import { ApplicantsModule } from './applicant/applicant.module';
     FormsModule,
     ApplicantsModule,
 
-    // Подключение к PostgreSQL
+    // TypeORM подключение к postgresql
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -38,10 +39,10 @@ import { ApplicantsModule } from './applicant/applicant.module';
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, // Поставить false если таблицы уже есть
+        synchronize: true,
         logging: true,
       }),
     }),
   ],
 })
-export class AppModule { }
+export class AppModule {}

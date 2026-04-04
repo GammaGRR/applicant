@@ -10,7 +10,7 @@ export class ApplicantsService {
   constructor(
     @InjectRepository(Applicant)
     private readonly applicantRepository: Repository<Applicant>,
-  ) {}
+  ) { }
 
   private parseCsvList(v: unknown): string[] {
     if (v === undefined || v === null) return [];
@@ -165,8 +165,8 @@ export class ApplicantsService {
     return this.applicantRepository.save(applicant);
   }
 
-  async update(id: number, data: Partial<Applicant> & { checkedDocuments?: string[] }): Promise<Applicant | null> {
-    const { checkedDocuments: _, ...saveData } = data;
+  async update(id: number, data: Partial<Applicant> & { checkedDocuments?: string[]; documentCounts?: Record<string, number> }): Promise<Applicant | null> {
+    const { checkedDocuments: _, documentCounts: __, ...saveData } = data;
     await this.applicantRepository.update(id, saveData);
     return this.findOne(id);
   }
