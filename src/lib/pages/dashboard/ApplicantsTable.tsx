@@ -12,6 +12,8 @@ import { cleanDisplayValue, computePointFromGpa } from './utils';
 type Props = {
   applicants: Applicant[];
   total: number;
+  page: number;
+  pageSize: number;
   loading: boolean;
   filters: FilterState;
   filterOptions: Record<string, string[]>;
@@ -20,11 +22,14 @@ type Props = {
   onResetFilters: () => void;
   onListRefresh: () => void;
   onStatsRefresh: () => void;
+  onPageChange: (page: number) => void;
 };
 
 export function ApplicantsTable({
   applicants,
   total,
+  page,
+  pageSize,
   loading,
   filters,
   filterOptions,
@@ -33,6 +38,7 @@ export function ApplicantsTable({
   onResetFilters,
   onListRefresh,
   onStatsRefresh,
+  onPageChange,
 }: Props) {
   const refreshAll = () => {
     onListRefresh();
@@ -45,8 +51,13 @@ export function ApplicantsTable({
         <div>
           <h2 className="font-semibold text-gray-900 text-sm">Список абитуриентов</h2>
           <p className="text-xs text-gray-400 mt-0.5">
-            Показано: {applicants.length}
-            {applicants.length !== total && <span> · Всего в базе: {total}</span>}
+            Строк на странице: {applicants.length} из {Math.min(pageSize, total || pageSize)}
+            {total > 0 && (
+              <span>
+                {' '}
+                · Всего в базе: {total} · Страница {page} из {Math.max(1, Math.ceil(total / pageSize))}
+              </span>
+            )}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -213,6 +224,47 @@ export function ApplicantsTable({
           </tbody>
         </table>
       </div>
+      {total > 0 && (
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-t border-gray-100 text-xs sm:text-sm text-gray-500 gap-2">
+          <div>
+            Страница {page} из {Math.max(1, Math.ceil(total / pageSize))}
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => onPageChange(1)}
+              disabled={page <= 1}
+              className="px-2 py-1 rounded-md border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              «
+            </button>
+            <button
+              type="button"
+              onClick={() => onPageChange(page - 1)}
+              disabled={page <= 1}
+              className="px-2 py-1 rounded-md border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Назад
+            </button>
+            <button
+              type="button"
+              onClick={() => onPageChange(page + 1)}
+              disabled={page >= Math.ceil(total / pageSize)}
+              className="px-2 py-1 rounded-md border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Вперёд
+            </button>
+            <button
+              type="button"
+              onClick={() => onPageChange(Math.max(1, Math.ceil(total / pageSize)))}
+              disabled={page >= Math.ceil(total / pageSize)}
+              className="px-2 py-1 rounded-md border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              »
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

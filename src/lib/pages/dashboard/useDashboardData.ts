@@ -18,6 +18,8 @@ export function useDashboardData(token: string | null) {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Record<string, number>>({});
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
@@ -33,7 +35,10 @@ export function useDashboardData(token: string | null) {
     if (debouncedSearch) {
       p.set('search', debouncedSearch);
       p.set('query', debouncedSearch);
+      p.set('exactSearch', 'true');
     }
+    p.set('page', String(page));
+    p.set('limit', String(pageSize));
     if (filters.docStatus?.length) p.set('docStatus', filters.docStatus.join(','));
     if (filters.classes?.length) p.set('classes', filters.classes.join(','));
     if (filters.profession?.length) p.set('profession', filters.profession.join(','));
@@ -41,7 +46,7 @@ export function useDashboardData(token: string | null) {
     if (filters.point?.length) p.set('point', filters.point.join(','));
     if (filters.benefit?.length) p.set('benefit', filters.benefit.join(','));
     return p;
-  }, [filters, debouncedSearch]);
+  }, [filters, debouncedSearch, page]);
 
   const fetchApplicants = useCallback(async () => {
     setLoading(true);
@@ -104,6 +109,7 @@ export function useDashboardData(token: string | null) {
 
   const handleFilterChange = (key: keyof FilterState, values: string[]) => {
     setFilters((prev) => ({ ...prev, [key]: values }));
+    setPage(1);
   };
 
   const hasActiveFilters = Object.values(filters).some((v) => v.length > 0) || !!debouncedSearch;
@@ -111,6 +117,7 @@ export function useDashboardData(token: string | null) {
   const resetAllFilters = () => {
     setFilters(EMPTY_FILTERS);
     setSearchTerm('');
+    setPage(1);
   };
 
   const refreshListAndStats = useCallback(() => {
@@ -123,6 +130,8 @@ export function useDashboardData(token: string | null) {
     setSearchTerm,
     applicants,
     total,
+    page,
+    pageSize,
     loading,
     stats,
     filters,
@@ -133,5 +142,6 @@ export function useDashboardData(token: string | null) {
     fetchApplicants,
     fetchStats,
     refreshListAndStats,
+    setPage,
   };
 }

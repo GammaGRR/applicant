@@ -19,8 +19,18 @@ type Props = {
   onClose: () => void;
 };
 
+type LookupResponse = {
+  total: number;
+  found: boolean;
+  rank?: number;
+  applicant?: StatApplicant;
+};
+
 export const SpecialtyModal = ({ specialty, onClose }: Props) => {
-  const [applicants, setApplicants] = useState<StatApplicant[]>([]);
+  const [totalInSpec, setTotalInSpec] = useState(0);
+  const [lookupApplicant, setLookupApplicant] = useState<StatApplicant | null>(null);
+  const [lookupRank, setLookupRank] = useState<number | null>(null);
+  const [lookupFound, setLookupFound] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -47,36 +57,60 @@ export const SpecialtyModal = ({ specialty, onClose }: Props) => {
   }, []);
 
   useEffect(() => {
-    const fetchApplicants = async () => {
+    const ac = new AbortController();
+    let cancelled = false;
+
+    const run = async (caseNumber: string) => {
       setLoading(true);
       setError(null);
       try {
-        const token = localStorage.getItem('access_token');
-        const res = await fetch(`${API_BASE}/applicants`, {
-          cache: 'no-store',
-          headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        });
+        const params = new URLSearchParams();
+        params.set('code', specialty.code ?? '');
+        params.set('name', specialty.name ?? '');
+        if (caseNumber) params.set('caseNumber', caseNumber);
+        const res = await fetch(
+          `${API_BASE}/specialities/stats/competition-lookup?${params.toString()}`,
+          { cache: 'no-store', signal: ac.signal },
+        );
         if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`);
-        const raw: StatApplicant[] | { items: StatApplicant[]; total: number } = await res.json();
-        const all: StatApplicant[] = Array.isArray(raw) ? raw : (raw as { items: StatApplicant[] }).items;
-
-        const norm = (s?: string) => (s || '').toLowerCase().trim().replace(/\s+/g, ' ');
-        const code = norm(specialty.code);
-        const name = norm(specialty.name);
-        const matched = all.filter((a) => {
-          const prof = norm(a.profession ?? '');
-          return (code && prof.includes(code)) || (name && prof.includes(name));
-        });
-
-        setApplicants(matched);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Не удалось загрузить данные');
+        const data = (await res.json()) as LookupResponse;
+        if (cancelled || ac.signal.aborted) return;
+        setTotalInSpec(data.total ?? 0);
+        if (!caseNumber) {
+          setLookupFound(false);
+          setLookupApplicant(null);
+          setLookupRank(null);
+        } else {
+          setLookupFound(!!data.found);
+          setLookupRank(data.found && data.rank != null ? data.rank : null);
+          setLookupApplicant(data.found && data.applicant ? data.applicant : null);
+        }
+      } catch (e: unknown) {
+        if ((e as Error).name === 'AbortError') return;
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : 'Не удалось загрузить данные');
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled && !ac.signal.aborted) setLoading(false);
       }
     };
-    void fetchApplicants();
-  }, [specialty.name, specialty.code]);
+
+    const trimmed = search.trim();
+    if (!trimmed) {
+      void run('');
+      return () => {
+        cancelled = true;
+        ac.abort();
+      };
+    }
+
+    const timer = window.setTimeout(() => void run(trimmed), 350);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      ac.abort();
+    };
+  }, [search, specialty.code, specialty.name]);
 
   const hasOriginal = (a: StatApplicant) =>
     a.documents?.some((d) => {
@@ -99,22 +133,6 @@ export const SpecialtyModal = ({ specialty, onClose }: Props) => {
     return str === 'сво' || str === 'сво.' || str.includes('специальная военная операция');
   };
 
-  const found = search.trim()
-    ? applicants.find(
-        (a) =>
-          String(a.caseNumber ?? '')
-            .trim()
-            .toLowerCase() === search.trim().toLowerCase(),
-      ) ?? null
-    : null;
-
-  const ranked = [...applicants].sort((a, b) => {
-    const ap = typeof a.point === 'number' && isFinite(a.point) ? a.point : -1;
-    const bp = typeof b.point === 'number' && isFinite(b.point) ? b.point : -1;
-    return bp - ap;
-  });
-  const foundRank = found ? ranked.findIndex((a) => a.id === found.id) + 1 : null;
-
   const docTag = (a: StatApplicant) => {
     if (hasOriginal(a))
       return (
@@ -134,6 +152,8 @@ export const SpecialtyModal = ({ specialty, onClose }: Props) => {
       </span>
     );
   };
+
+  const found = lookupFound && lookupApplicant ? lookupApplicant : null;
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center" onClick={handleClose}>
@@ -295,7 +315,7 @@ export const SpecialtyModal = ({ specialty, onClose }: Props) => {
                   </div>
                   <div
                     className={`rounded-xl border px-4 py-3 flex items-center justify-between ${
-                      foundRank && foundRank <= specialty.plan
+                      lookupRank && lookupRank <= specialty.plan
                         ? 'bg-green-50 border-green-200'
                         : 'bg-red-50 border-red-200'
                     }`}
@@ -305,25 +325,25 @@ export const SpecialtyModal = ({ specialty, onClose }: Props) => {
                       <div className="flex items-baseline gap-1.5">
                         <span
                           className={`font-bold text-2xl font-mono ${
-                            foundRank && foundRank <= specialty.plan ? 'text-green-700' : 'text-red-600'
+                            lookupRank && lookupRank <= specialty.plan ? 'text-green-700' : 'text-red-600'
                           }`}
                         >
-                          {foundRank ?? '—'}
+                          {lookupRank ?? '—'}
                         </span>
-                        <span className="text-xs text-gray-400">из {applicants.length}</span>
+                        <span className="text-xs text-gray-400">из {totalInSpec}</span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <Trophy
                         size={22}
-                        className={foundRank && foundRank <= specialty.plan ? 'text-green-400' : 'text-red-300'}
+                        className={lookupRank && lookupRank <= specialty.plan ? 'text-green-400' : 'text-red-300'}
                       />
                       <span
                         className={`text-xs font-semibold ${
-                          foundRank && foundRank <= specialty.plan ? 'text-green-600' : 'text-red-500'
+                          lookupRank && lookupRank <= specialty.plan ? 'text-green-600' : 'text-red-500'
                         }`}
                       >
-                        {foundRank && foundRank <= specialty.plan
+                        {lookupRank && lookupRank <= specialty.plan
                           ? `Проходит (план: ${specialty.plan})`
                           : `Не проходит (план: ${specialty.plan})`}
                       </span>
@@ -341,7 +361,7 @@ export const SpecialtyModal = ({ specialty, onClose }: Props) => {
 
         {!loading && !error && (
           <div className="px-6 py-3 bg-gray-50 border-t border-gray-100 flex justify-between text-xs text-gray-400">
-            <span>Всего в специальности: {applicants.length}</span>
+            <span>Всего в специальности: {totalInSpec}</span>
             {specialty.minScoreOrig !== null && (
               <span>Мин. (ориг.): {specialty.minScoreOrig.toFixed(2)}</span>
             )}

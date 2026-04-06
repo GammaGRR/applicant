@@ -11,6 +11,8 @@ export function DashboardPage() {
     setSearchTerm,
     applicants,
     total,
+    page,
+    pageSize,
     loading,
     stats,
     filters,
@@ -21,6 +23,7 @@ export function DashboardPage() {
     fetchApplicants,
     fetchStats,
     refreshListAndStats,
+    setPage,
   } = useDashboardData(token);
 
   return (
@@ -33,6 +36,8 @@ export function DashboardPage() {
           <ApplicantsTable
             applicants={applicants}
             total={total}
+            page={page}
+            pageSize={pageSize}
             loading={loading}
             filters={filters}
             filterOptions={filterOptions}
@@ -41,6 +46,11 @@ export function DashboardPage() {
             onResetFilters={resetAllFilters}
             onListRefresh={() => void fetchApplicants()}
             onStatsRefresh={() => void fetchStats()}
+            onPageChange={(next) => {
+              if (next < 1) return;
+              if (total && next > Math.ceil(total / pageSize)) return;
+              setPage(next);
+            }}
           />
         </main>
       </div>
